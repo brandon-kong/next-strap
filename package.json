@@ -1,6 +1,6 @@
 {
   "name": "next-strap",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "./dist/index.js",
   "scripts": {
@@ -23,5 +23,8 @@
     "@types/prompts": "^2.4.9",
     "prettier": "^3.2.5",
     "ts-node": "^10.9.2"
+  },
+  "bin": {
+    "next-strap": "./dist/index.js"
   }
 }
