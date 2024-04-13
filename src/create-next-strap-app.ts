@@ -37,7 +37,8 @@ export const createNextStrapApp = async (projectName: string | null, {
     const hasTailwindConfig = fs.existsSync("tailwind.config.js") || fs.existsSync("tailwind.config.ts");
 
     // add the packages
-    const addedPackages = ["jest", "react-testing-library", "husky", "prettier"];
+    const devPackages = ["jest", "react-testing-library", "husky", "prettier"]
+    const addedPackages = [];
     
     // ask the user for the packages to install
     const promptsList = [];
@@ -87,7 +88,7 @@ export const createNextStrapApp = async (projectName: string | null, {
 
     // install the packages
     console.log("\n📦 Installing packages...")
-    const installPackagesCommand = `npm install ${addedPackages.join(" ")}`;
+    const installPackagesCommand = `npm install ${addedPackages.join(" ")} ${devPackages.join(" -D ")}`;
     console.log("\n🔥 Running command: ", installPackagesCommand, "\n")
     execSync(installPackagesCommand, { stdio: "inherit" });
 
