@@ -34,10 +34,13 @@ export const createNextStrapApp = async (projectName: string | null, {
 
     // get project properties
     const hasTypescript = fs.existsSync("tsconfig.json");
+    const isSrcDirExists = fs.existsSync("src");
+    const isAppDirExists = isSrcDirExists ? fs.existsSync("src/app") : fs.existsSync("app");
+
     const hasTailwindConfig = fs.existsSync("tailwind.config.js") || fs.existsSync("tailwind.config.ts");
 
     // add the packages
-    const devPackages = ["jest", "react-testing-library", "husky", "prettier"]
+    const devPackages = ["jest", "@testing-library/react", "husky", "prettier"]
     const addedPackages = [];
     
     // ask the user for the packages to install
@@ -92,6 +95,24 @@ export const createNextStrapApp = async (projectName: string | null, {
     console.log("\n🔥 Running command: ", installPackagesCommand, "\n")
     execSync(installPackagesCommand, { stdio: "inherit" });
 
+    // add a util folder
+    fs.mkdirSync(isSrcDirExists ? "src/util" : "util");
+
+    // add the theme file
+    
+
+    if (withAuth || response.withAuth) {
+        // add the env variables
+        console.log("\n🔧 Adding environment variables...")
+        fs.writeFileSync(".env.local", "NEXTAUTH_URL=\"http://localhost:3000\"\nNEXTAUTH_SECRET=\"my-secret\"\n");
+
+
+
+        // add the auth provider
+        console.log("\n🔧 Adding auth provider...")
+        
+    }
+
     // initialize jest
     console.log("\n🔧 Initializing jest...")
     const jestInitCommand = "npx jest --init";
@@ -118,7 +139,7 @@ export const createNextStrapApp = async (projectName: string | null, {
 
     // initialize husky
     console.log("\n🔧 Initializing husky...");
-    const huskyInitCommand = "npx husky install";
+    const huskyInitCommand = "npx husky init";
     console.log("\n🔥 Running command: ", huskyInitCommand, "\n")
     execSync(huskyInitCommand, { stdio: "inherit" });
 
@@ -129,4 +150,5 @@ export const createNextStrapApp = async (projectName: string | null, {
     packageJson.scripts["format-check"] = "prettier --check ./src";
     packageJson.scripts.format = "prettier --write ./src";
     fs.writeFileSync("package.json", JSON.stringify(packageJson, null, 2));
+
 };
