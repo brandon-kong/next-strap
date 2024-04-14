@@ -26,6 +26,11 @@ const program = programCmd
 
 const options = program.opts();
 
+process.on('SIGINT', () => {
+    console.log("\n\n🚀 Thank you for using next-strap! Have a great day ahead! 🚀\n\n");
+    process.exit(0);
+});
+
 async function main () {
     await checkOutdatedPackage();
     program.parse();

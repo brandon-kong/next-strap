@@ -1,6 +1,6 @@
 import fs from "fs";
 import { OptionType } from '.';
-import { execSync } from "child_process";
+import { exec, execSync } from "child_process";
 import prompts from "prompts";
 import AllPrompts from "./helpers/util/prompts";
 
@@ -83,20 +83,25 @@ export const createNextStrapApp = async (projectName: string | null, {
                     addedPackages.push("next-themes");
                     break;
                 case "withAuth":
-                    addedPackages.push("next-auth");
+                    addedPackages.push("next-auth jwt-decode");
                     break;
             }
         }
     }
 
+    const srcDir = isSrcDirExists ? "src/" : "";
+    const utilDir = srcDir + "util/";
+    const appDir = isAppDirExists ? srcDir + "app/" : 'pages/';
+
     // install the packages
     console.log("\n📦 Installing packages...")
-    const installPackagesCommand = `npm install ${addedPackages.join(" ")} ${devPackages.join(" -D ")}`;
+    const installPackagesCommand = `npm install ${addedPackages.join(" ")}`;
     console.log("\n🔥 Running command: ", installPackagesCommand, "\n")
     execSync(installPackagesCommand, { stdio: "inherit" });
+    execSync("npm install --save-dev " + devPackages.join(" "), { stdio: "inherit" });
 
     // add a util folder
-    fs.mkdirSync(isSrcDirExists ? "src/util" : "util");
+    fs.mkdirSync(utilDir, { recursive: true });
 
     // add the theme file
     
@@ -104,13 +109,20 @@ export const createNextStrapApp = async (projectName: string | null, {
     if (withAuth || response.withAuth) {
         // add the env variables
         console.log("\n🔧 Adding environment variables...")
-        fs.writeFileSync(".env.local", "NEXTAUTH_URL=\"http://localhost:3000\"\nNEXTAUTH_SECRET=\"my-secret\"\n");
+        fs.writeFileSync(".env.local", "NEXTAUTH_URL=\"http://localhost:3000/api/auth/\"\nNEXTAUTH_SECRET=\"my-secret\"\n");
 
 
 
         // add the auth provider
         console.log("\n🔧 Adding auth provider...")
         
+        // create auth folder in util
+        fs.mkdirSync(utilDir + "auth/", { recursive: true });
+        fs.mkdirSync(appDir + "api/auth/[...nextauth]", { recursive: true });
+
+        // copy the auth-options file into the project
+        fs.copyFileSync(__dirname + `/templates/${hasTypescript ? 'ts' : 'js'}/auth-options.${hasTypescript ? 'ts' : 'js'}`, utilDir + "auth/options.ts");
+        fs.copyFileSync(__dirname + `/templates/${hasTypescript ? 'ts' : 'js'}/auth-route.${hasTypescript ? 'ts' : 'js'}`, appDir + `api/auth/[...nextauth]/${isAppDirExists ? 'route' : 'index'}.${hasTypescript ? 'ts' : 'js'}`);
     }
 
     // initialize jest
@@ -150,5 +162,4 @@ export const createNextStrapApp = async (projectName: string | null, {
     packageJson.scripts["format-check"] = "prettier --check ./src";
     packageJson.scripts.format = "prettier --write ./src";
     fs.writeFileSync("package.json", JSON.stringify(packageJson, null, 2));
-
 };

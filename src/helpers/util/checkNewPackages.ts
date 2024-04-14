@@ -5,7 +5,13 @@ export const checkOutdatedPackage = async () => {
 		// success command
 		console.log("\n⏳ Checking for new updates...");
 		const command = "npm outdated --location=global";
-		const output = execSync(command);
+		const output = execSync(command, {
+			timeout: 10000
+		});
+
+		throw "Couldn't check for updates."
+
+		
 	} catch (error: any) {
 		if (error.stdout.toString().includes("next-strap")) {
 			console.log(
